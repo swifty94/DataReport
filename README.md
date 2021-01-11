@@ -26,7 +26,6 @@ This will collect CPE related information to the internal lightweight SQLite3 da
 
 3. Obtain a list of CPEs based on the WAN username list. Use:
 
-``` user@host:~$ python3 app.py eat $your_file_name E.g: ```
 ``` user@host:~$ python3 app.py eat wan_usernames.txt ```
 
 NOTE: 
@@ -37,12 +36,17 @@ start /B python app.py $command
 
 Once the command is issued you might track its progress in the app.log file. Use:
 
-``` tail -f app.log - to view how it is progressing while processing your request ```
+``` tail -f app.log ```  to view how it is progressing while processing your request 
 
 Examples:
 ---
-![](https://raw.githubusercontent.com/swifty94/DataReport/master/img/start.png)
+![](https://raw.githubusercontent.com/swifty94/DataReport/master/img/usage.png)
 
-![](https://raw.githubusercontent.com/swifty94/DataReport/master/img/log.png)
 
-![](https://raw.githubusercontent.com/swifty94/DataReport/master/img/result.png)
+![](https://raw.githubusercontent.com/swifty94/DataReport/master/img/applog.png)
+
+
+![](https://raw.githubusercontent.com/swifty94/DataReport/master/img/applog2.png)
+
+
+![](https://raw.githubusercontent.com/swifty94/DataReport/master/img/fullreport.png)
