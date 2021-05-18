@@ -6,7 +6,7 @@
 #
 
 MYSQL_DBCONFIG = {                
-        'host':     'localhost',
+        'host':     'demo.friendly-tech.com',
         'user':     'ftacs',
         'password':  'ftacs',
         'database': 'ftacs',
@@ -14,7 +14,7 @@ MYSQL_DBCONFIG = {
 
 
 #
-#       SQL queries base for each TR parameter
+#       MySQL queries base for each TR parameter
 #
 
 SERIAL_Q = f"""
@@ -70,26 +70,43 @@ from cpe_parameter p, cpe_parameter_name n
 where p.name_id=n.id and
 """
 
+UPDATED_Q = """
+SELECT DATE_FORMAT(c.updated, '%Y-%m-%d_%H:%i:%S')
+FROM cpe c, product_class p, manufacturer m
+WHERE c.product_class_id = p.id AND
+p.manufacturer_id = m.oui AND
+p.manuf_id = m.id AND
+"""
+
+#
+#       SQLite part
+#
+
 LITE_FULL_Q = """
-SELECT cpe_id, serial, manufacturer, modelname, activeip, wanusername, connectiontype, activeconnection
+SELECT cpe_id, serial, manufacturer, modelname, activeip, wanusername, connectiontype, activeconnection, updated
 FROM cpeModel
 ORDER BY ID ASC
 """
 
 LITE_GUEST_Q = """
-select cpe_id, serial, manufacturer, modelname, wanusername, connectiontype
+select cpe_id, serial, manufacturer, modelname, wanusername, connectiontype, updated
 from cpeModel
 where wanusername like '%guest%';
 """
 
 LITE_FIBER_Q = """
-select cpe_id, serial, manufacturer, modelname, wanusername, connectiontype
+select cpe_id, serial, manufacturer, modelname, wanusername, connectiontype, updated
 from cpeModel
 where connectiontype = 'Ethernet';
 """
 
 LITE_GETUN_FROM_LIST_Q = """
-SELECT cpe_id, serial, manufacturer, modelname, wanusername
+SELECT cpe_id, serial, manufacturer, modelname, wanusername, updated
+FROM cpeModel
+"""
+
+LITE_CONN_Q = """
+select cpe_id, serial, manufacturer, modelname, wanusername, connectiontype, updated
 FROM cpeModel
 """
 

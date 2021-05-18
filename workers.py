@@ -3,7 +3,7 @@ import logging
 logging.config.fileConfig('logging.ini', disable_existing_loggers=False)
 import mysql.connector
 from multiprocessing import Process
-import os, csv
+import os, csv, os.path
 import sqlite3
 
 class MySQLProcessor():
@@ -40,7 +40,74 @@ class MySQLProcessor():
                 connection.close()                
 
 
-class SQLLiteProcessor():    
+class SQLLiteProcessor():
+
+    @staticmethod
+    def isDb() -> bool:            
+        """
+        :Check if DB exists \n
+        :Accept - None\n
+        :Return - Bool
+        """
+        try:                        
+            db = os.path.isfile('cpe.db')
+            if db:
+                logging.info(f'{__class__.__name__ } Internal database already exist')
+                logging.info(f'{__class__.__name__ } Re-creating application schema')
+                os.remove('cpe.db')                      
+                return True
+            else:
+                logging.info(f'{__class__.__name__ } Internal database does not exist')
+                logging.info(f'{__class__.__name__ } Creating application schema')      
+                return False
+        except Exception as e:            
+            logging.error(f'{__class__.__name__ } Error \n{e}', exc_info=1)
+    
+    @staticmethod
+    def connect():
+        """
+        :Creating SQLite connection \n
+        :Accept - None\n
+        :Return - Connection object
+        """
+        try:
+            connection = sqlite3.connect('cpe.db')            
+            return connection
+        except sqlite3.Error as e:
+            logging.error(f'{__class__.__name__ } Error \n{e}', exc_info=1)
+    
+    @staticmethod
+    def initDb():
+        """
+        :Initiating database if not exist \n
+        :Accept - None\n
+        :Return - None
+        """
+        try:                        
+            connection = None                         
+            connection = SQLLiteProcessor.connect()
+            cursor = connection.cursor()
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS `cpeModel` (
+            `ID`	INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+            `cpe_id`	INTEGER,
+            `serial`	TEXT,
+            `manufacturer`	TEXT,
+            `modelname`	TEXT,
+            `activeip`	TEXT,
+            `wanusername`	TEXT,
+            `connectiontype`	TEXT,
+            `activeconnection`	TEXT,
+            `updated`	TEXT);
+            """)
+        except Exception as e:
+            logging.error(f'{__class__.__name__ } Error \n{e}', exc_info=1)
+        finally:
+            connection.commit()                        
+            logging.info(f'{__class__.__name__ } Database created')
+            if connection:
+                connection.close()
+
     @staticmethod
     def insert_data(json):
         """
@@ -51,8 +118,8 @@ class SQLLiteProcessor():
             cursor = connection.cursor()        
             sql = """
             INSERT or IGNORE INTO cpeModel
-            (cpe_id, serial, manufacturer, modelname, activeip, wanusername, connectiontype, activeconnection) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
+            (cpe_id, serial, manufacturer, modelname, activeip, wanusername, connectiontype, activeconnection, updated) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"""
             data = []
             for value in json.values():
                     data.append(value)

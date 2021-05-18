@@ -1,6 +1,6 @@
 import os, re, csv, time
-from time import time
 import datetime
+from time import time
 from multiprocessing import Process
 import logging.config
 import logging
@@ -34,7 +34,7 @@ class CPEModel():
             if ids_list:
                 logging.info(f'{__class__.__name__ } Result fetched')                
             else:
-                logging.info(f'{__class__.__name__ } Result fetch FAILED')            
+                logging.error(f'{__class__.__name__ } Result fetch FAILED')            
     
     @staticmethod
     def process_device_data():
@@ -70,12 +70,17 @@ class CPEModel():
         #
         logging.info(f'{__class__.__name__ } Result fetch start')
         try:            
-            from settings import SERIAL_Q, MANUF_Q, MODEL_Q, ACTIVE_IP, ACTIVE_OBJ_Q, WAN_CONN_Q, WAN_UN_Q         
+            from settings import SERIAL_Q, MANUF_Q, MODEL_Q, ACTIVE_IP, ACTIVE_OBJ_Q, WAN_CONN_Q, WAN_UN_Q, UPDATED_Q       
             for i in CPEModel.get_ids():
                 ID = i
                 serial = Processor.fetch_result(SERIAL_Q+f"c.id = {i}")
                 serial = str(serial)
-                serial = serial.replace('"','').replace('\'','').replace('[','').replace(']','')                
+                serial = serial.replace('"','').replace('\'','').replace('[','').replace(']','')
+
+                updated = Processor.fetch_result(UPDATED_Q+f"c.id = {i}")                
+                updated = str(updated)
+                updated = updated.replace('"','').replace('\'','').replace('[','').replace(']','')                                
+
                 manufacturer = Processor.fetch_result(MANUF_Q+f"c.id = {i}") 
                 manufacturer = str(manufacturer)
                 manufacturer = manufacturer.replace('"','').replace('\'','').replace('[','').replace(']','').replace(" ","")             
@@ -99,7 +104,7 @@ class CPEModel():
                     wanusername = str(wanusername)
                     wanusername = wanusername.replace('"','').replace('\'','').replace('[','').replace(']','')
                     json = {}                              
-                    keys = ['ID','serial','manufacturer','modelname','activeip','wanusername','connectiontype','activeconnection']
+                    keys = ['ID','serial','manufacturer','modelname','activeip','wanusername','connectiontype','activeconnection','updated']
                     json["ID"] = ID
                     json["serial"] = serial
                     json["manufacturer"] = manufacturer
@@ -107,7 +112,8 @@ class CPEModel():
                     json["activeip"] = activeip
                     json["wanusername"] = wanusername
                     json["connectiontype"] = connectiontype                    
-                    json["activeconnection"] = activeconnection                    
+                    json["activeconnection"] = activeconnection
+                    json["updated"] = updated           
                     process_data = Process(target=SQLLiteProcessor.insert_data, args=(json,))                    
                     process_data.start()
                     logging.info(f"{__class__.__name__ }[Process-{process_data.pid}][CPE-{json['ID']}")                   
@@ -118,14 +124,14 @@ class CPEModel():
             logging.info(f'{__class__.__name__ } Result fetch end')
 
     @staticmethod
-    def report(report_type):        
+    def report(report_type):   
         now = datetime.datetime.now()
         date = now.strftime("%m-%d-%H-%M-%S")
         report = f'reports/CPE_Report-{report_type}-{date}.csv'         
         if report_type == 'full':
             logging.info(f"{__class__.__name__ }>[ProcessingReport: {report_type}]")
             from settings import LITE_FULL_Q        
-            keys = ['ID','serial','manufacturer','modelname','activeip','wanusername','connectiontype','activeconnection']
+            keys = ['ID','serial','manufacturer','modelname','activeip','wanusername','connectiontype','activeconnection','updated']
             data = SQLLiteProcessor.select_data(LITE_FULL_Q)            
             json = {
                 'ID':'',
@@ -135,7 +141,8 @@ class CPEModel():
                 'activeip':'',
                 'wanusername':'',
                 'connectiontype':'',                
-                'activeconnection':''
+                'activeconnection':'',
+                'updated':''
             }
             for item in data:
                 for x,y in zip(item, json.keys()):
@@ -148,7 +155,7 @@ class CPEModel():
         elif report_type == 'fiber':
             logging.info(f"{__class__.__name__ }>[ProcessingReport: {report_type}]")
             from settings import LITE_FIBER_Q
-            keys = ['ID','serial','manufacturer','modelname','wanusername','connectiontype']
+            keys = ['ID','serial','manufacturer','modelname','wanusername','connectiontype','updated']
             data = SQLLiteProcessor.select_data(LITE_FIBER_Q)            
             json = {
                 'ID':'',
@@ -156,7 +163,8 @@ class CPEModel():
                 'manufacturer':'',
                 'modelname':'',                
                 'wanusername':'',
-                'connectiontype':''                
+                'connectiontype':'',
+                'updated':''                
             }
             for item in data:
                 for x,y in zip(item, json.keys()):
@@ -169,14 +177,38 @@ class CPEModel():
         elif report_type == 'guest_acc':
             logging.info(f"{__class__.__name__ }>[ProcessingReport: {report_type}]")
             from settings import LITE_GUEST_Q
-            keys = ['ID','serial','manufacturer','modelname','wanusername']
+            keys = ['ID','serial','manufacturer','modelname','wanusername','updated']
             data = SQLLiteProcessor.select_data(LITE_GUEST_Q)            
             json = {
                 'ID':'',
                 'serial':'',
                 'manufacturer':'',
                 'modelname':'',                
-                'wanusername':'',                             
+                'wanusername':'',
+                'updated':''                          
+            }
+            if data:
+                for item in data:
+                    for x,y in zip(item, json.keys()):
+                        json[y] = x                     
+                    process_data = Process(target=CSVWritter.write_to_csv, args=(keys,report,json,))
+                    process_data.start()
+                    logging.info(f"{__class__.__name__ }[Process-{process_data.pid}][CPE-{json['ID']}")                 
+                    process_data.join()
+        
+        elif report_type == 'connection':
+            logging.info(f"{__class__.__name__ }>[ProcessingReport: {report_type}]")
+            from settings import LITE_CONN_Q
+            keys = ['ID','serial','manufacturer','modelname','wanusername','connectiontype','updated']
+            data = SQLLiteProcessor.select_data(LITE_CONN_Q)            
+            json = {
+                'ID':'',
+                'serial':'',
+                'manufacturer':'',
+                'modelname':'',                
+                'wanusername':'',
+                'connectiontype':'',
+                'updated':''           
             }
             if data:
                 for item in data:
