@@ -6,7 +6,7 @@
 #
 
 MYSQL_DBCONFIG = {                
-        'host':     'demo.friendly-tech.com',
+        'host':     'localhost',
         'user':     'ftacs',
         'password':  'ftacs',
         'database': 'ftacs',
