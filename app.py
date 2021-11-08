@@ -10,8 +10,7 @@ if __name__ == "__main__":
     try:
         cli_arg = sys.argv[1]
         if cli_arg == 'collect':
-            if SQLLiteProcessor.isDb():
-                SQLLiteProcessor.initDb()
+            SQLLiteProcessor.isDb()
             CPEModel.process_device_data()
             exit(0)
         elif cli_arg == 'report':

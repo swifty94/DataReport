@@ -28,6 +28,11 @@ class MySQLProcessor():
                 param = param.strip('(,)')
                 final.append(param)
             return final
+        except mysql.connector.errors.InterfaceError as c:
+            _l = f'Cannot connect to MySQL database! {c}. Application exit!'
+            logging.critical(_l)
+            print(_l)
+            exit(1)
         except Exception as e:
             logging.error(f'{self.__class__.__name__ } error {e}')
             logging.debug(f'{self.__class__.__name__ } SQL: \n {query}')
@@ -54,12 +59,19 @@ class SQLLiteProcessor():
             if db:
                 logging.info(f'{__class__.__name__ } Internal database already exist')
                 logging.info(f'{__class__.__name__ } Re-creating application schema')
-                os.remove('cpe.db')                      
+                os.remove('cpe.db') 
+                SQLLiteProcessor.initDb()                     
                 return True
             else:
                 logging.info(f'{__class__.__name__ } Internal database does not exist')
-                logging.info(f'{__class__.__name__ } Creating application schema')      
+                logging.info(f'{__class__.__name__ } Creating application schema')
+                SQLLiteProcessor.initDb()      
                 return False
+        except PermissionError as p:
+            _l = f"Cannot access internal database: {p}"
+            logging.critical(_l)
+            print(_l)
+            exit(1)
         except Exception as e:            
             logging.error(f'{__class__.__name__ } Error \n{e}', exc_info=1)
     
