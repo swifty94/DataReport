@@ -174,6 +174,10 @@ class CSVWritter():
                 if not exist:
                     writer.writeheader()
                 writer.writerow(json)
+        except FileNotFoundError:
+            logging.critical(f"\nCant access either reports/ folder or destination file {report_name}.")
+            print(f"\nCant access either \"reports/\" folder or destination file {report_name}.")
+            return
         except Exception as e:
             logging.error(f'{__class__.__name__ } CSV data processing error {e}',exc_info=1)        
             

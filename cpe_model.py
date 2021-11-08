@@ -20,7 +20,7 @@ class CPEModel():
         try:            
             Processor = MySQLProcessor()            
         except Exception as e:
-            logging.error(f'{__class__.__name__ } failed to instantiate {Processor.__class__.__name__}, error {e}, Full trace: \n', exc_info=1)
+            logging.error(f'{__class__.__name__ } failed to instantiate {MySQLProcessor.__class__.__name__}, error {e}, Full trace: \n', exc_info=1)
         finally:
             if Processor:
                 logging.info(f'{__class__.__name__ } New instance {Processor.__class__.__name__} created')
@@ -47,7 +47,7 @@ class CPEModel():
             logging.info(f'{__class__.__name__ } Result fetch start')
             Processor = MySQLProcessor()            
         except Exception as e:
-            logging.error(f'{__class__.__name__ } failed to instantiate {Processor.__class__.__name__}')
+            logging.error(f'{__class__.__name__ } failed to instantiate {MySQLProcessor.__class__.__name__}')
             logging.error(f'{__class__.__name__ } error {e}',exc_info=1)
         finally:            
             if Processor:
@@ -186,7 +186,7 @@ class CPEModel():
         elif report_type == 'dsl':
             logging.info(f"{__class__.__name__ }>[ProcessingReport: {report_type}]")
             from settings import LITE_DSL_Q
-            keys = ['ID','serial','manufacturer','modelname','wanusername','connectiontype','updated']
+            keys = ['ID','serial','manufacturer','modelname','wanusername','connectiontype','modulation','updated']
             data = SQLLiteProcessor.select_data(LITE_DSL_Q)            
             json = {
                 'ID':'',

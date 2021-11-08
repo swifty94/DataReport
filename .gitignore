@@ -1,4 +1,4 @@
 __pycache__/*
-reports/CPE*
+reports/*.csv
 *.log
 cpe.db

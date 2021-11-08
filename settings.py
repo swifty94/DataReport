@@ -6,7 +6,7 @@
 #
 
 MYSQL_DBCONFIG = {                
-        'host':     'demo.friendly-tech.com',
+        'host':     'localhost',
         'user':     'ftacs',
         'password':  'ftacs',
         'database': 'ftacs',
@@ -83,7 +83,7 @@ p.manuf_id = m.id AND
 #
 
 LITE_FULL_Q = """
-SELECT cpe_id, serial, manufacturer, modelname, activeip, wanusername, connectiontype, activeconnection, updated
+SELECT cpe_id, serial, manufacturer, modelname, activeip, wanusername, connectiontype, modulation, activeconnection, updated
 FROM cpeModel
 ORDER BY ID ASC
 """
@@ -101,7 +101,7 @@ where connectiontype = 'Ethernet';
 """
 
 LITE_DSL_Q = """
-select cpe_id, serial, manufacturer, modelname, wanusername, connectiontype, updated
+select cpe_id, serial, manufacturer, modelname, wanusername, connectiontype, modulation, updated
 from cpeModel
 where connectiontype = 'DSL';
 """
